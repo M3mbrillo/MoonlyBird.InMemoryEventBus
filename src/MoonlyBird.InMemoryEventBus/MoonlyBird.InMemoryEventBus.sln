@@ -1,0 +1,27 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MoonlyBird.InMemoryEventBus", "MoonlyBird.InMemoryEventBus\MoonlyBird.InMemoryEventBus.csproj", "{3E944AE4-55F9-4F34-AAB0-709DE5DC3136}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "_Test", "_Test", "{2B815EFC-3F0D-452D-8F98-303CFD508E08}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MoonlyBird.InMemoryEventBus.Test", "_Test\MoonlyBird.InMemoryEventBus.Test\MoonlyBird.InMemoryEventBus.Test.csproj", "{A651119B-115D-4CAD-9CFD-6F022AB4899A}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{3E944AE4-55F9-4F34-AAB0-709DE5DC3136}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3E944AE4-55F9-4F34-AAB0-709DE5DC3136}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3E944AE4-55F9-4F34-AAB0-709DE5DC3136}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3E944AE4-55F9-4F34-AAB0-709DE5DC3136}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A651119B-115D-4CAD-9CFD-6F022AB4899A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A651119B-115D-4CAD-9CFD-6F022AB4899A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A651119B-115D-4CAD-9CFD-6F022AB4899A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A651119B-115D-4CAD-9CFD-6F022AB4899A}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{A651119B-115D-4CAD-9CFD-6F022AB4899A} = {2B815EFC-3F0D-452D-8F98-303CFD508E08}
+	EndGlobalSection
+EndGlobal
