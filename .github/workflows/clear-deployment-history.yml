@@ -1,0 +1,21 @@
+name: Clear deployment history
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment-name:
+        description: enviroment name to REMOVE ALL deployment
+        type: string
+jobs:
+  Cleaning:
+    name: Clear deploy history
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Delete Deployment Environment
+        uses: strumwolf/delete-deployment-environment@v3.0.0
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          environment: ${{ inputs.environment-name }}
+          onlyRemoveDeployments: true
+        
+            
