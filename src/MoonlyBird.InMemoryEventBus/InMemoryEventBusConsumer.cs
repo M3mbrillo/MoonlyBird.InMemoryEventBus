@@ -78,9 +78,10 @@ internal sealed class InMemoryEventBusConsumer<T> : IConsumer<T>
                 break;
 
             // invoke handlers in parallel
-            await Parallel.ForEachAsync(handlers, _stoppingToken.Token,
-                async (handler, scopedToken) => await ExecuteHandler(handler, task, contextAccessor, scopedToken)
-                    .ConfigureAwait(false)
+            await Parallel.ForEachAsync(
+                handlers,
+                _stoppingToken.Token,
+                async (handler, scopedToken) => await ExecuteHandler(handler, task, contextAccessor, scopedToken).ConfigureAwait(false)
             ).ConfigureAwait(false);
         }
     }

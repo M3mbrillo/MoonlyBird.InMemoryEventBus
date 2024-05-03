@@ -1,5 +1,4 @@
 ﻿using System.Collections.Concurrent;
-using MoonlyBird.InMemoryEventBus.Test.SimpleUse.Model;
 
 namespace MoonlyBird.InMemoryEventBus.Test.CreditPayment.Model;
 

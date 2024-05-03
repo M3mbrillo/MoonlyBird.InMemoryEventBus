@@ -1,7 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using MoonlyBird.InMemoryEventBus.Abstract;
 using MoonlyBird.InMemoryEventBus.Test.CreditPayment.Model;
-using MoonlyBird.InMemoryEventBus.Test.SimpleUse.Model;
 
 namespace MoonlyBird.InMemoryEventBus.Test.CreditPayment.EventHandler;
 

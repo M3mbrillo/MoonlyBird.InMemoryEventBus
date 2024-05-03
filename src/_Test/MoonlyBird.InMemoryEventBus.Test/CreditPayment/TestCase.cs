@@ -1,10 +1,8 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using MoonlyBird.InMemoryEventBus.Abstract;
+﻿using MoonlyBird.InMemoryEventBus.Abstract;
 using MoonlyBird.InMemoryEventBus.Abstract.Model;
 using MoonlyBird.InMemoryEventBus.Test.CreditPayment.Model;
-using MoonlyBird.InMemoryEventBus.Test.SimpleUse.Model;
 
-namespace MoonlyBird.InMemoryEventBus.Test.SimpleUse;
+namespace MoonlyBird.InMemoryEventBus.Test.CreditPayment;
 
 public class TestCase
 {

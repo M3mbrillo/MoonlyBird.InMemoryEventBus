@@ -1,11 +1,11 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using MoonlyBird.InMemoryEventBus.Abstract;
-using MoonlyBird.InMemoryEventBus.Extension;
+using MoonlyBird.InMemoryEventBus.DependencyInjection;
 using MoonlyBird.InMemoryEventBus.Test.CreditPayment.EventHandler;
-using MoonlyBird.InMemoryEventBus.Test.SimpleUse.Model;
+using MoonlyBird.InMemoryEventBus.Test.CreditPayment.Model;
 
-namespace MoonlyBird.InMemoryEventBus.Test.SimpleUse;
+namespace MoonlyBird.InMemoryEventBus.Test.CreditPayment;
 
 public class Setup
 {
@@ -17,8 +17,10 @@ public class Setup
         
         serviceCollection.AddLogging(x => x.AddSimpleConsole());
 
-        serviceCollection.AddInMemoryEvent<PaymentEvent, NotifyBigPaymentEventHandler>();
-        serviceCollection.AddInMemoryEvent<PaymentEvent, DebitAccountBankEventHandler>();
+        serviceCollection
+            .AddInMemoryEvent<PaymentEvent>()
+            .WithHandler<NotifyBigPaymentEventHandler>()
+            .WithHandler<DebitAccountBankEventHandler>();
 
         Provider = serviceCollection.BuildServiceProvider();
     }
