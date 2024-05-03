@@ -4,6 +4,10 @@
         <TargetFramework>net8.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <Authors>M3mbrillo</Authors>
+        <PackageLicenseUrl>https://github.com/M3mbrillo/MoonlyBird.InMemoryEventBus/blob/master/LICENSE</PackageLicenseUrl>
+        <RepositoryUrl>https://github.com/M3mbrillo/MoonlyBird.InMemoryEventBus</RepositoryUrl>
     </PropertyGroup>
 
     <ItemGroup>
