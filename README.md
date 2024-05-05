@@ -1,7 +1,5 @@
 # MoonlyBird.InMemoryEventBus
 
-[![Publish nuget](https://github.com/M3mbrillo/MoonlyBird.InMemoryEventBus/actions/workflows/nuget-deploy.yml/badge.svg)](https://github.com/M3mbrillo/MoonlyBird.InMemoryEventBus/actions/workflows/nuget-deploy.yml)
-
 https://www.nuget.org/packages/MoonlyBird.InMemoryEventBus/
 
 ---
