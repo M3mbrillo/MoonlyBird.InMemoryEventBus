@@ -10,7 +10,6 @@ public static class InMemoryServiceExtension
 {
     public static ConfigureEventBus<TEvent> AddInMemoryEvent<TEvent>(this IServiceCollection services)
     {
-
         var configureEventBus = new ConfigureEventBus<TEvent>(services);
         
         return configureEventBus;

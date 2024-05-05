@@ -2,7 +2,15 @@
 
 namespace MoonlyBird.InMemoryEventBus.Abstract;
 
-public interface IProducer<T> : IAsyncDisposable
+public interface IProducer : IAsyncDisposable
+{
+    ValueTask PublishAsync(Event<object> @event, CancellationToken token = default);
+}
+
+public interface IProducer<T> : IProducer
 {
     ValueTask PublishAsync(Event<T> @event, CancellationToken token = default);
+
+    ValueTask IProducer.PublishAsync(Event<object> @event, CancellationToken token)
+        => PublishAsync(@event, token);
 }
