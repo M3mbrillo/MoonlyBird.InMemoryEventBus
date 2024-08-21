@@ -54,12 +54,18 @@ public sealed class ConfigureEventBus<TEvent>
             typeof(EventContextAccessor<TEvent>));
     }
     
+    [Obsolete("Use ConfigureEventBus<TEvent>.AddConsumerGroupScoped")]
     public ConfigureEventBus<TEvent> WithHandler<THandler>()
         where THandler : class, IEventHandler<TEvent>
     {
-        // Add the handler...
         _serviceCollection.AddScoped<IEventHandler<TEvent>, THandler>();
         
         return this;
     }
+
+    public ConfigureEventBus<TEvent> AddConsumerGroupScoped()
+    {
+        throw new NotImplementedException();
+    }
+    
 }

@@ -12,7 +12,7 @@ internal sealed class InMemoryEventBusConsumer<T> : IConsumer<T>
     private readonly ChannelReader<Event<T>> _bus;
     private readonly IServiceScopeFactory _scopeFactory;
     private readonly ILogger<InMemoryEventBusConsumer<T>> _logger;
-
+    
     public InMemoryEventBusConsumer(
         ChannelReader<Event<T>> bus,
         IServiceScopeFactory scopeFactory,
@@ -23,10 +23,10 @@ internal sealed class InMemoryEventBusConsumer<T> : IConsumer<T>
         _bus = bus;
         _scopeFactory = scopeFactory;
     }
-    
+
 
     private CancellationTokenSource? _stoppingToken;
-    
+
     public async ValueTask Start(CancellationToken token = default)
     {
         EnsureStoppingTokenIsCreated(token);
@@ -36,8 +36,9 @@ internal sealed class InMemoryEventBusConsumer<T> : IConsumer<T>
 
         // retrieve scoped dependencies
         var handlers = scope.ServiceProvider
-                                            .GetServices<IEventHandler<T>>()
-                                            .ToList();
+            .GetServices<IEventHandler<T>>()
+            .ToList();
+        
         var metadataAccessor = scope.ServiceProvider.GetRequiredService<IEventContextAccessor<T>>();
 
         if (handlers.Count == 0)
@@ -45,12 +46,25 @@ internal sealed class InMemoryEventBusConsumer<T> : IConsumer<T>
             _logger.LogWarning("No handlers defined for event of {type}", typeof(T).Name);
             return;
         }
-
-        // run the processing
-        Task.Run(
+        
+        _ = Task.Run(
             async () => await StartProcessing(handlers, metadataAccessor).ConfigureAwait(false),
             _stoppingToken!.Token
-        ).ConfigureAwait(false);
+        )
+        .ContinueWith((processingTask, o) =>
+        {
+            var logger = o as ILogger<InMemoryEventBusConsumer<T>>;
+            
+            logger?.LogInformation("InMemoryEventBusConsumer for events [{event}] is ending!", typeof(T).FullName);
+            
+            if (processingTask.IsCanceled)
+                logger?.LogWarning("InMemoryEventBusConsumer for events [{event}] was canceled", typeof(T).FullName);
+            
+            if (processingTask.IsFaulted)
+                logger?.LogError("InMemoryEventBusConsumer for events [{event}] end as result of a unhandled exception. the task is Faulted", typeof(T).FullName);
+            
+        }, _logger, _stoppingToken!.Token)
+        .ConfigureAwait(false);
     }
 
     private void EnsureStoppingTokenIsCreated(CancellationToken token = default)
@@ -59,10 +73,12 @@ internal sealed class InMemoryEventBusConsumer<T> : IConsumer<T>
         {
             _stoppingToken.Cancel();
         }
-        
-        _stoppingToken = token.CanBeCanceled ? CancellationTokenSource.CreateLinkedTokenSource(token) : new CancellationTokenSource();
+
+        _stoppingToken = token.CanBeCanceled
+            ? CancellationTokenSource.CreateLinkedTokenSource(token)
+            : new CancellationTokenSource();
     }
-    
+
     /// <summary>
     /// Subscribes to channel changes and triggers event handling
     /// </summary>
@@ -72,7 +88,7 @@ internal sealed class InMemoryEventBusConsumer<T> : IConsumer<T>
             .WithCancellation(_stoppingToken.Token)
             .ConfigureAwait(false);
 
-        await foreach (var task in continuousChannelIterator)
+        await foreach (var messageEvent in continuousChannelIterator)
         {
             if (_stoppingToken.IsCancellationRequested)
                 break;
@@ -81,7 +97,8 @@ internal sealed class InMemoryEventBusConsumer<T> : IConsumer<T>
             await Parallel.ForEachAsync(
                 handlers,
                 _stoppingToken.Token,
-                async (handler, scopedToken) => await ExecuteHandler(handler, task, contextAccessor, scopedToken).ConfigureAwait(false)
+                async (handler, scopedToken) =>
+                    await ExecuteHandler(handler, messageEvent, contextAccessor, scopedToken).ConfigureAwait(false)
             ).ConfigureAwait(false);
         }
     }
@@ -89,20 +106,33 @@ internal sealed class InMemoryEventBusConsumer<T> : IConsumer<T>
     /// <summary>
     /// Executes the handler in async scope
     /// </summary>
-    private ValueTask ExecuteHandler(IEventHandler<T> handler, Event<T> task, IEventContextAccessor<T> ctx, CancellationToken token)
+    private ValueTask ExecuteHandler(IEventHandler<T> eventHandler, Event<T> messageEvent, IEventContextAccessor<T> ctx,
+        CancellationToken token)
     {
-        ctx.Set(task); // set metadata and begin scope
-        using var logScope = _logger.BeginScope(task.Metadata ?? new EventMetadata(Guid.NewGuid().ToString()));
+        ctx.Set(messageEvent); // set metadata and begin scope
+        using var logScope = _logger.BeginScope(messageEvent.Metadata ?? new EventMetadata(Guid.NewGuid().ToString()));
 
-        Task.Run(
-            async () => await handler.Handle(task.Data, token), token
-        ).ConfigureAwait(false);
+        Task.Run(async () => await eventHandler.Handle(messageEvent.Data, token), token)
+            .ContinueWith(async (handlerTask, state) =>
+            {
+                var (msg, handler, ct) = ((Event<T> msg, IEventHandler<T> handler, CancellationToken ct))state!;
+
+                if (handlerTask.IsFaulted)
+                {
+                    await handler.HandleException(msg, handlerTask.Exception, ct);
+                }
+                else if (handlerTask.IsCanceled)
+                {
+                    await handler.HandleCancellation(msg, ct);
+                }
+                
+            }, (msg: messageEvent, handler: eventHandler, ct: token), token)
+            .ConfigureAwait(false);
 
         return ValueTask.CompletedTask;
     }
-    
-    
-    
+
+
     public async ValueTask Stop(CancellationToken _ = default)
     {
         await DisposeAsync().ConfigureAwait(false);

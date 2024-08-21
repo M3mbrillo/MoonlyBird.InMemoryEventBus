@@ -1,5 +1,6 @@
 ﻿using MoonlyBird.InMemoryEventBus.Abstract;
 using MoonlyBird.InMemoryEventBus.Abstract.Model;
+using MoonlyBird.InMemoryEventBus.Test.CreditPayment.EventHandler;
 using MoonlyBird.InMemoryEventBus.Test.CreditPayment.Model;
 
 namespace MoonlyBird.InMemoryEventBus.Test.CreditPayment;
@@ -7,23 +8,47 @@ namespace MoonlyBird.InMemoryEventBus.Test.CreditPayment;
 public class TestCase
 {
     private Setup _setup = new();
-    private IProducer<PaymentEvent> _producer;
+    private IProducer<PaymentEvent> _producer => _setup.GetProducer<PaymentEvent>();
 
-
-    public TestCase()
+    [Fact]
+    async Task ScammerException()
     {
+        Vault.InitVaultStores(new(), new());
         
-    }
+        var consumer = _setup.GetConsumer<PaymentEvent>();
+        
+        var scammerAccount = (accountNumber: DetectScammersEventHandler.ScammerAccount, currentAmmount: 15);
+        Vault.CreateBankAccount(scammerAccount);
 
+        await consumer.Start();
+
+        var scammerPaymentAmount = 10;
+        await Pay(scammerAccount, scammerPaymentAmount);
+        
+        await Task.Delay(TimeSpan.FromSeconds(2));
+        
+        Vault.AssertSuspiciousTransaction(suspicius =>
+        {
+            suspicius = suspicius.ToList();
+            Assert.Single(suspicius);
+
+            var transaction = suspicius.Single();
+            Assert.Equal(scammerAccount.accountNumber, transaction.bankAccount);
+            Assert.Equal(scammerPaymentAmount, transaction.amount);
+        });
+    }
+    
     [Fact]
     async Task Workflow()
     {
-        _producer = _setup.GetProducer<PaymentEvent>();
+        Vault.InitVaultStores(new(), new());
+        
         var consumer = _setup.GetConsumer<PaymentEvent>();
         
         var accountOne = (accountNumber: "XXX", currentAmount: 10_000m);
         var accountTwo = (accountNumber: "YYY", currentAmount: 10_000m);
 
+        
         Vault.CreateBankAccount(accountOne);
         Vault.CreateBankAccount(accountTwo);
         
@@ -36,7 +61,7 @@ public class TestCase
         accountTwo.currentAmount = await Pay(accountTwo, suspiciousAmount); // One suspicius :$
         accountOne.currentAmount = await Pay(accountOne, 500);
         
-        Thread.Sleep(TimeSpan.FromSeconds(2));
+        await Task.Delay(TimeSpan.FromSeconds(2));
 
         Vault.AssertSuspiciousTransaction(suspicius =>
         {
