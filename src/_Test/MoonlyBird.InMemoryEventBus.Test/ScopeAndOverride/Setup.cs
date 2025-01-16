@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Logging;
 using MoonlyBird.InMemoryEventBus.Abstract;
 using MoonlyBird.InMemoryEventBus.DependencyInjection;
+using MoonlyBird.InMemoryEventBus.ScopeContext;
 using MoonlyBird.InMemoryEventBus.Test.ScopeAndOverride.EventHandler;
 using MoonlyBird.InMemoryEventBus.Test.ScopeAndOverride.Model;
 
@@ -22,16 +23,17 @@ public class Setup
             return uniqueServiceScope;
         });
 
-        serviceCollection
-            .AddInMemoryEvent<DummyEvent>()
-            .AddConsumerGroupScoped(configureGroup =>
-                configureGroup
-                    .AddHandler<RewriteModelEventHandler>()
-                    .AddHandler<ClearModelEventHandler>()
-            );
+
+        serviceCollection.AddInMemoryEvent<DummyEvent>()
+            // .AddHandler<RewriteModelEventHandler>(EnumScopeContext.EventBus)
+            .AddHandler<RewriteModelEventHandler>(EnumScopeContext.Message)
+            .AddHandler<ClearModelEventHandler>(EnumScopeContext.Message);
+
+            // .AddHandler<RewriteModelEventHandler>(EnumScopeContext.Handler);
         
         Provider = serviceCollection.BuildServiceProvider();
     }
+    
     
     public IConsumer<T> GetConsumer<T>()
         => Provider.GetRequiredService<IConsumer<T>>();

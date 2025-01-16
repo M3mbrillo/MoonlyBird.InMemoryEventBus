@@ -37,6 +37,36 @@ public class TestCase
             Assert.Equal(scammerPaymentAmount, transaction.amount);
         });
     }
+
+
+    [Fact]
+    async Task LongTransactionCancellation()
+    {
+        Vault.InitVaultStores(new(), new());
+        
+        var consumer = _setup.GetConsumer<PaymentEvent>();
+        
+        var longTransactionAccount = (accountNumber: LongTransactionEventHandler.LongTransactionAccount, currentAmmount: 10_000);
+        Vault.CreateBankAccount(longTransactionAccount);
+        
+        var cancellationTokenSource = new CancellationTokenSource();
+        await consumer.Start(cancellationTokenSource.Token);
+        
+        var longTransactionPaymentAmount = 7_000;
+        await Pay(longTransactionAccount, longTransactionPaymentAmount);
+        
+        
+        await Task.Delay(TimeSpan.FromSeconds(0.5), cancellationTokenSource.Token);
+        await consumer.Stop();
+        // Gracefull execution cancellation handler
+        await Task.Delay(TimeSpan.FromSeconds(0.5), cancellationTokenSource.Token);
+        
+        Vault.AssertLedger((bankAccounts) =>
+        {
+             var currentAmount = bankAccounts[LongTransactionEventHandler.LongTransactionAccount];
+             Assert.Equal(longTransactionAccount.currentAmmount, currentAmount);
+        });
+    }
     
     [Fact]
     async Task Workflow()
@@ -47,7 +77,6 @@ public class TestCase
         
         var accountOne = (accountNumber: "XXX", currentAmount: 10_000m);
         var accountTwo = (accountNumber: "YYY", currentAmount: 10_000m);
-
         
         Vault.CreateBankAccount(accountOne);
         Vault.CreateBankAccount(accountTwo);
@@ -63,6 +92,9 @@ public class TestCase
         
         await Task.Delay(TimeSpan.FromSeconds(2));
 
+        // dont die main thread please D:
+        // await Task.Delay(TimeSpan.FromHours(24));
+        
         Vault.AssertSuspiciousTransaction(suspicius =>
         {
             suspicius = suspicius.ToList();

@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Logging;
 using MoonlyBird.InMemoryEventBus.Abstract;
 using MoonlyBird.InMemoryEventBus.DependencyInjection;
+using MoonlyBird.InMemoryEventBus.ScopeContext;
 using MoonlyBird.InMemoryEventBus.Test.CreditPayment.EventHandler;
 using MoonlyBird.InMemoryEventBus.Test.CreditPayment.Model;
 
@@ -19,9 +20,11 @@ public class Setup
 
         serviceCollection
             .AddInMemoryEvent<PaymentEvent>()
-            .WithHandler<NotifyBigPaymentEventHandler>()
-            .WithHandler<DebitAccountBankEventHandler>()
-            .WithHandler<DetectScammersEventHandler>();
+            .AddHandler<NotifyBigPaymentEventHandler>()
+            .AddHandler<DebitAccountBankEventHandler>()
+            .AddHandler<DetectScammersEventHandler>()
+            .AddHandler<LongTransactionEventHandler>()
+            ;
 
         Provider = serviceCollection.BuildServiceProvider();
     }

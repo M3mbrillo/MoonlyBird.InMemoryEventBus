@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Logging;
 using MoonlyBird.InMemoryEventBus.Abstract;
 using MoonlyBird.InMemoryEventBus.DependencyInjection;
+using MoonlyBird.InMemoryEventBus.ScopeContext;
 using MoonlyBird.InMemoryEventBus.Test.RacingLog.EventHandler;
 using MoonlyBird.InMemoryEventBus.Test.RacingLog.Model;
 
@@ -20,7 +21,7 @@ public class Setup
 
         serviceCollection
             .AddInMemoryEvent<LongTaskEvent>()
-            .WithHandler<SleepingEventHandler>();
+            .AddHandler<SleepingEventHandler>(EnumScopeContext.Message);
 
         Provider = serviceCollection.BuildServiceProvider();
     }

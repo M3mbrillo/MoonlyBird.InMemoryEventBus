@@ -1,15 +1,16 @@
-﻿namespace MoonlyBird.InMemoryEventBus.Abstract;
+﻿using MoonlyBird.InMemoryEventBus.Abstract.ScopeContext;
 
-public interface IConsumer : IAsyncDisposable
+namespace MoonlyBird.InMemoryEventBus.Abstract;
+
+public interface IConsumer : IAsyncDisposable, IDisposable
 {
     ValueTask Start(CancellationToken token = default);
-    ValueTask Stop(CancellationToken token = default);
+    ValueTask Stop();
     Type GetEventType() => typeof(object);
 }
 
-public interface IConsumer<T> : IConsumer
+public interface IConsumer<TEvent> : IConsumer
 {
-    new Type GetEventType() => typeof(T);
-
+    new Type GetEventType() => typeof(TEvent);
     Type IConsumer.GetEventType() => GetEventType();
 }

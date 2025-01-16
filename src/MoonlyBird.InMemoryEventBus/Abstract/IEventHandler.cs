@@ -9,6 +9,7 @@ public interface IEventHandler<T>
     ValueTask HandleException(Event<T> dataEvent, Exception exception, CancellationToken token = default)
         => ValueTask.CompletedTask;
     
-    ValueTask HandleCancellation(Event<T> dataEvent,CancellationToken token = default)
+    // TODO tiene sentido un CancellationToken si estoy manejando una cancelacion?
+    ValueTask HandleCancellation(Event<T> dataEvent, CancellationToken token = default)
         => ValueTask.CompletedTask; 
 }
