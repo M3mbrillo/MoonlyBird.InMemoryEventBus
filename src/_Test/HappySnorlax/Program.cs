@@ -10,10 +10,10 @@ using MoonlyBird.InMemoryEventBus.DependencyInjection;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddInMemoryEvent<FeedEvent>()
-    // .AddHandler<BigSnorlax>()
-    // .AddHandler<ChadSnorlax>()
-    // .AddHandler<LazySnorlax>()
-    // .AddHandler<CommonSnorlax>()
+    .AddHandler<BigSnorlax>()
+    .AddHandler<ChadSnorlax>()
+    .AddHandler<LazySnorlax>()
+    .AddHandler<NormalSnorlax>()
     .AddHandler<AngrySnorlax>()
     ;
 
